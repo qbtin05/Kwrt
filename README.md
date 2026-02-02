@@ -15,7 +15,7 @@
 3. 点击 **Run workflow** 按钮
 4. 选择构建选项:
    - **target**: 选择要构建的平台 (或选择 "ALL" 构建所有平台)
-   - **rockchip_device**: 如果选择了 rockchip_armv8 平台，可以选择特定的设备型号（支持79个设备）
+   - **rockchip_device**: 如果选择了 rockchip_armv8 平台，可以选择特定的设备型号（提供80个选项：79个设备 + "all" 选项）
    - **param**: 可选参数 (如 `ssh`, `nocache`, `notg` 等)
 
 #### 支持的 Rockchip 设备
