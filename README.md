@@ -15,12 +15,12 @@
 3. 点击 **Run workflow** 按钮
 4. 选择构建选项:
    - **target**: 选择要构建的平台 (或选择 "ALL" 构建所有平台)
-   - **rockchip_device**: 如果选择了 rockchip_armv8 平台，可以选择特定的设备型号（提供80个选项：79个设备 + "all" 选项）
+   - **rockchip_device**: 如果选择了 rockchip_armv8 平台，可以选择特定的设备型号（提供81个选项：80个设备 + "all" 选项）
    - **param**: 可选参数 (如 `ssh`, `nocache`, `notg` 等)
 
 #### 支持的 Rockchip 设备
 
-本项目支持79个 Rockchip 设备，包括但不限于:
+本项目支持80个 Rockchip 设备，包括但不限于:
 - FriendlyARM NanoPi 系列 (R2S, R4S, R5S, R6S 等)
 - Radxa Rock 系列 (Rock 3/4/5, Rock Pi 4A 等)
 - Orange Pi 5 系列
