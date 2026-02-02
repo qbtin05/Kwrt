@@ -1,0 +1,566 @@
+#=================================================
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com
+#=================================================
+
+name: Build OpenWrt
+
+on: 
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Select target to build'
+        required: true
+        type: choice
+        options:
+          - 'ALL'
+          - 'x86_64'
+          - 'x86_generic'
+          - 'rockchip_armv8'
+          - 'bcm27xx_bcm2712'
+          - 'bcm27xx_bcm2711'
+          - 'bcm27xx_bcm2710'
+          - 'bcm27xx_bcm2709'
+          - 'bcm27xx_bcm2708'
+          - 'armsr_armv8'
+          - 'mediatek_mt7622'
+          - 'mediatek_filogic'
+          - 'qualcommax_ipq50xx'
+          - 'qualcommax_ipq60xx'
+          - 'qualcommax_ipq807x'
+          - 'ramips_mt7621'
+          - 'ramips_mt7620'
+          - 'ramips_mt76x8'
+          - 'ipq40xx_generic'
+          - 'ipq806x_generic'
+          - 'amlogic_meson8b'
+          - 'amlogic_meson'
+          - 'mvebu_cortexa9'
+          - 'bcm53xx'
+          - 'sunxi_cortexa53'
+          - 'sunxi_cortexa7'
+          - 'ath79_nand'
+          - 'airoha_an7581'
+          - 'siflower_sf21'
+      rockchip_device:
+        description: 'Select Rockchip device (only for rockchip_armv8 target)'
+        required: false
+        type: choice
+        options:
+          - 'all'
+          - 'advantech_rsb4810'
+          - 'ariaboard_photonicat'
+          - 'ariaboard_photonicat2'
+          - 'armsom_sige1'
+          - 'armsom_sige3'
+          - 'armsom_sige5'
+          - 'armsom_sige7'
+          - 'armsom_w3'
+          - 'codinge_xiaobao-nas-v1'
+          - 'dilusense_dlfr100'
+          - 'ezpro_mrkaio-m68s'
+          - 'ezpro_mrkaio-m68s-plus'
+          - 'fastrhino_r66s'
+          - 'fastrhino_r68s'
+          - 'firefly_station-p2'
+          - 'friendlyarm_nanopc-t4'
+          - 'friendlyarm_nanopc-t6'
+          - 'friendlyarm_nanopi-m5'
+          - 'friendlyarm_nanopi-neo3'
+          - 'friendlyarm_nanopi-r2c'
+          - 'friendlyarm_nanopi-r2c-plus'
+          - 'friendlyarm_nanopi-r2s'
+          - 'friendlyarm_nanopi-r2s-plus'
+          - 'friendlyarm_nanopi-r3s'
+          - 'friendlyarm_nanopi-r4s'
+          - 'friendlyarm_nanopi-r4se'
+          - 'friendlyarm_nanopi-r5c'
+          - 'friendlyarm_nanopi-r5s'
+          - 'friendlyarm_nanopi-r6c'
+          - 'friendlyarm_nanopi-r6s'
+          - 'friendlyarm_nanopi-r76s'
+          - 'hinlink_opc-h28k'
+          - 'hinlink_opc-h29k'
+          - 'hinlink_opc-h66k'
+          - 'hinlink_opc-h68k'
+          - 'hinlink_opc-h69k'
+          - 'hinlink_opc-ht2'
+          - 'lyt_t68m'
+          - 'mmbox_anas3035'
+          - 'nlnet_xiguapi-v3'
+          - 'panther_x2'
+          - 'pine64_rockpro64'
+          - 'radxa_e20c'
+          - 'radxa_e24c'
+          - 'radxa_e25'
+          - 'radxa_e52c'
+          - 'radxa_e54c'
+          - 'radxa_rock-2a'
+          - 'radxa_rock-2f'
+          - 'radxa_rock-3a'
+          - 'radxa_rock-3b'
+          - 'radxa_rock-3c'
+          - 'radxa_rock-4c-plus'
+          - 'radxa_rock-4d'
+          - 'radxa_rock-4se'
+          - 'radxa_rock-5a'
+          - 'radxa_rock-5b'
+          - 'radxa_rock-5c'
+          - 'radxa_rock-pi-4a'
+          - 'radxa_zero-3e'
+          - 'radxa_zero-3w'
+          - 'rocktech_mpc1903'
+          - 'rongpin_king3399'
+          - 'rumu3f_fine-3399'
+          - 'scensmart_sv901-eaio'
+          - 'seewo_srcm3588-io'
+          - 'seewo_srcm3588-sw'
+          - 'seewo_sv21'
+          - 'sharevdi_guangmiao-g4c'
+          - 'sharevdi_h3399pc'
+          - 'widora_mangopi-m28'
+          - 'widora_mangopi-m28c'
+          - 'widora_mangopi-m28k'
+          - 'widora_mangopi-m28k-pro'
+          - 'xunlong_orangepi-5'
+          - 'xunlong_orangepi-5-max'
+          - 'xunlong_orangepi-5-plus'
+          - 'xunlong_orangepi-5-ultra'
+          - 'xunlong_orangepi-r1-plus'
+          - 'xunlong_orangepi-r1-plus-lts'
+      param:
+        description: 'Additional parameters (optional)'
+        required: false
+        default: ''
+
+env:
+  REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TOKEN_KIDDIN9: ${{ secrets.TOKEN_KIDDIN9 }}
+  PPPOE_USERNAME: ${{ secrets.PPPOE_USERNAME }}
+  PPPOE_PASSWD: ${{ secrets.PPPOE_PASSWD }}
+  SCKEY: ${{ secrets.SCKEY }}
+  TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  DOCKER_ID: ${{ secrets.DOCKER_ID }}
+  DOCKER_PASSWD: ${{ secrets.DOCKER_PASSWD }}
+  TZ: Asia/Shanghai
+
+  UPLOAD_FIRMWARE_FOR_RELEASE: true
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'ALL'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Cancel running workflows
+      uses: styfle/cancel-workflow-action@main
+      if: contains(github.event.inputs.param, 'cw')
+      with:
+        workflow_id: all
+        access_token: ${{ secrets.TOKEN_KIDDIN9 }}
+
+    - name: Load Settings.ini
+      run: |
+        source "${GITHUB_WORKSPACE}/devices/common/settings.ini"
+        echo "REPO_URL=${REPO_URL}" >> $GITHUB_ENV
+        echo "REPO_BRANCH=${REPO_BRANCH}" >> $GITHUB_ENV
+
+    - name: Trigger Packages Update
+      run: |
+        gitdate=$(curl -H "Authorization: token ${{ secrets.TOKEN_KIDDIN9 }}" -s "https://api.github.com/repos/kiddin9/kwrt-packages/actions/runs" | jq -r '.workflow_runs[0].created_at')
+        gitdate=$(date -d "$gitdate" +%s)
+        now=$(date -d "$(date)" +%s)
+        if [[ $(expr $gitdate + 120) < $now ]]; then
+        curl -X POST https://api.github.com/repos/kiddin9/kwrt-packages/dispatches \
+        -H "Accept: application/vnd.github.everest-preview+json" \
+        -H "Authorization: token ${{ secrets.TOKEN_KIDDIN9 }}" \
+        --data '{"event_type": "update"}'
+        fi
+
+    - name: Trigger builds for all targets
+      run: |
+        sudo timedatectl set-timezone "$TZ"
+        
+        targets=(
+          "x86_64"
+          "x86_generic"
+          "rockchip_armv8"
+          "bcm27xx_bcm2712"
+          "bcm27xx_bcm2711"
+          "bcm27xx_bcm2710"
+          "bcm27xx_bcm2709"
+          "bcm27xx_bcm2708"
+          "armsr_armv8"
+          "mediatek_mt7622"
+          "mediatek_filogic"
+          "qualcommax_ipq50xx"
+          "qualcommax_ipq60xx"
+          "qualcommax_ipq807x"
+          "ramips_mt7621"
+          "ramips_mt7620"
+          "ramips_mt76x8"
+          "ipq40xx_generic"
+          "ipq806x_generic"
+          "amlogic_meson8b"
+          "amlogic_meson"
+          "mvebu_cortexa9"
+          "bcm53xx"
+          "sunxi_cortexa53"
+          "sunxi_cortexa7"
+          "ath79_nand"
+          "airoha_an7581"
+          "siflower_sf21"
+        )
+        
+        for target in "${targets[@]}"; do
+          curl \
+            -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.TOKEN_KIDDIN9 }}" \
+            -d "{\"event_type\": \"${target} ${{ github.event.inputs.param }}\", \"client_payload\": {\"target\": \"${target}\"}}"
+        done
+
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target != 'ALL')
+    
+    name: Build ${{ github.event.client_payload.target || github.event.inputs.target }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+      with:
+          fetch-depth: 0
+
+    - name: Set target
+      id: set-target
+      run: |
+        if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+          echo "target=${{ github.event.client_payload.target }}" >> $GITHUB_ENV
+          echo "TARGET=${{ github.event.client_payload.target }}" >> $GITHUB_ENV
+        else
+          echo "target=${{ github.event.inputs.target }}" >> $GITHUB_ENV
+          echo "TARGET=${{ github.event.inputs.target }}" >> $GITHUB_ENV
+        fi
+
+    - name: Load Settings.ini
+      run: |
+        echo ${{ env.TARGET }}
+        source "${{ github.workspace }}/devices/common/settings.ini"
+        if [ -f "devices/${{ env.TARGET }}/settings.ini" ]; then
+          source "${{ github.workspace }}/devices/${{ env.TARGET }}/settings.ini"
+        fi
+        echo "REPO_URL=${REPO_URL}" >> $GITHUB_ENV
+        echo "REPO_BRANCH=${REPO_BRANCH}" >> $GITHUB_ENV
+        echo "CONFIG_FILE=${CONFIG_FILE}" >> $GITHUB_ENV
+        echo "DIY_SH=${DIY_SH}" >> $GITHUB_ENV
+        echo "FREE_UP_DISK=${FREE_UP_DISK}" >> $GITHUB_ENV
+        echo "UPLOAD_BIN_DIR_FOR_ARTIFACT=${UPLOAD_BIN_DIR_FOR_ARTIFACT}" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE_FOR_ARTIFACT=${UPLOAD_FIRMWARE_FOR_ARTIFACT}" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE_FOR_RELEASE=${UPLOAD_FIRMWARE_FOR_RELEASE}" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE_TO_COWTRANSFER=${UPLOAD_FIRMWARE_TO_COWTRANSFER}" >> $GITHUB_ENV
+        echo "UPLOAD_FIRMWARE_TO_WETRANSFER=${UPLOAD_FIRMWARE_TO_WETRANSFER}" >> $GITHUB_ENV
+        sed -i "1a REPO_TOKEN=${{ secrets.GITHUB_TOKEN }}" ${{ github.workspace }}/devices/common/diy.sh
+        sed -i "1a TARGET=${{ env.TARGET }}" ${{ github.workspace }}/devices/common/diy.sh
+
+    - name: Trigger Packages Update
+      continue-on-error: true
+      if: contains(github.event.action, 'pkg') || contains(github.event.inputs.param, 'pkg')
+      run: |
+        status=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -s "https://api.github.com/repos/kiddin9/kwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
+        if [[ "$status" == "completed" ]]; then
+          curl -X POST https://api.github.com/repos/kiddin9/kwrt-packages/dispatches \
+            -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          --data '{"event_type": "update"}'
+        fi
+
+    - name: Free disk space
+      uses: coder-xiaomo/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install build-essential clang flex bison g++ gawk \
+        gcc-multilib g++-multilib gettext git libncurses5-dev libssl-dev \
+        python3-setuptools rsync swig unzip zlib1g-dev file wget \
+        llvm python3-pyelftools libpython3-dev aria2 jq qemu-utils ccache rename \
+        libelf-dev device-tree-compiler libgmp3-dev libmpc-dev libfuse-dev
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "Asia/Shanghai"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+
+    - name: Get current date
+      id: date
+      run: |
+        echo "date=$(date +'%m/%d_%Y_%H/%M')" >> $GITHUB_ENV
+        echo "date2=$(date +'%m/%d %Y')" >> $GITHUB_ENV
+        VERSION="$(echo "${{github.event.action}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
+        if [ -z "$VERSION" ]; then
+          VERSION="$(echo "${{github.event.inputs.param}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
+        fi
+        [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV
+
+    - name: Clone source code
+      run: |
+        set -x
+        TAG_INFO="$(curl -gs -H 'Content-Type: application/json' \
+           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+           -X POST -d '{ "query": "query {repository(owner: \"openwrt\", name: \"openwrt\") {refs(refPrefix: \"refs/tags/\", first: 4, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {nodes {name target { ... on Tag {tagger {date}}}}}}}"}' https://api.github.com/graphql)"
+        TAG_DATE="$( echo ${TAG_INFO} | jq -r '.data.repository.refs.nodes[] | select(.name | startswith("v25")) | .target.tagger.date' | head -n 1)"
+        if [[ $(( ($(date +%s) - $(date -d "$TAG_DATE" +%s)) / 86400 )) -lt 15 ]]; then
+        REPO_BRANCH="$( echo ${TAG_INFO} | jq -r '.data.repository.refs.nodes[].name' | grep v25 | head -n 1)"
+        # REPO_BRANCH="openwrt-25.12"
+        else
+        REPO_BRANCH="openwrt-25.12"
+        fi
+        #echo "CONFIG_VERSION_REPO=\"https://dl.openwrt.ai/releases/`echo $REPO_BRANCH  | cut -d . -f 1,2 | sed -e 's/^v//'`\"">>devices/common/.config
+        echo "CONFIG_VERSION_REPO=\"https://dl.openwrt.ai/releases/25.12\"">>devices/common/.config
+        if [[ ! "${{ env.REPO_BRANCH }}" && "$REPO_URL" == "https://github.com/openwrt/openwrt" ]]; then
+            git clone $REPO_URL -b $REPO_BRANCH openwrt
+        elif [[ ! "${{ env.REPO_BRANCH }}" ]]; then
+            git clone $REPO_URL openwrt
+        else
+            REPO_BRANCH="${{env.REPO_BRANCH}}"
+            if [[ ${#REPO_BRANCH} -lt 10 ]]; then
+                git clone $REPO_URL -b ${REPO_BRANCH} openwrt
+            else
+                git clone $REPO_URL openwrt
+                cd openwrt
+                git checkout ${REPO_BRANCH}
+            fi
+        fi
+
+    - name: Free up disk space
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo mkdir -p -m 777 /mnt/openwrt/build_dir openwrt/staging_dir
+        ln -sf /mnt/openwrt/build_dir openwrt/build_dir
+        sudo ln -sf openwrt/staging_dir /mnt/openwrt/staging_dir
+
+    - name: Load custom configuration
+      run: |
+        function git_clone_path() {
+          trap 'rm -rf "$tmpdir"' EXIT
+          branch="$1" rurl="$2" mv="$3"
+          [[ "$mv" != "mv" ]] && shift 2 || shift 3
+          rootdir="$PWD"
+          tmpdir="$(mktemp -d)" || exit 1
+          if [ ${#branch} -lt 10 ]; then
+          git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$tmpdir"
+          cd "$tmpdir"
+          else
+          git clone --filter=blob:none --sparse "$rurl" "$tmpdir"
+          cd "$tmpdir"
+          git checkout $branch
+          fi
+          if [ "$?" != 0 ]; then
+            echo "error on $rurl"
+            exit 1
+          fi
+          git sparse-checkout init --cone
+          git sparse-checkout set $@
+          [[ "$mv" != "mv" ]] && cp -rn ./* $rootdir/ || mv -n $@/* $rootdir/$@/
+          cd $rootdir
+          }
+        export -f git_clone_path
+        cp -rf devices/common/. openwrt/
+        cp -rf devices/${{ env.TARGET }}/. openwrt/
+        cp -rf devices openwrt/
+        cd openwrt
+        chmod +x devices/common/$DIY_SH
+        /bin/bash "devices/common/$DIY_SH"
+        cp -f devices/common/$CONFIG_FILE .config
+        if [ -f "devices/${{ env.TARGET }}/$CONFIG_FILE" ]; then
+          echo >> .config
+          cat devices/${{ env.TARGET }}/$CONFIG_FILE >> .config
+        fi
+        if [ -f "devices/${{ env.TARGET }}/$DIY_SH" ]; then
+          chmod +x devices/${{ env.TARGET }}/$DIY_SH
+          echo "/bin/bash devices/${{ env.TARGET }}/$DIY_SH"
+          /bin/bash "devices/${{ env.TARGET }}/$DIY_SH"
+        fi
+        cp -Rf ./diy/* ./ || true
+
+    - name: Configure Rockchip device
+      if: env.TARGET == 'rockchip_armv8' && github.event.inputs.rockchip_device != '' && github.event.inputs.rockchip_device != 'all'
+      run: |
+        cd openwrt
+        DEVICE="${{ github.event.inputs.rockchip_device }}"
+        echo "Building specific Rockchip device: $DEVICE"
+        
+        # Disable all devices first
+        sed -i 's/^\(CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_.*\)=y$/\1=n/g' .config
+        
+        # Enable only the selected device
+        if grep -q "CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_${DEVICE}=" .config; then
+          sed -i "s/CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_${DEVICE}=.*/CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_${DEVICE}=y/" .config
+        else
+          echo "CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_${DEVICE}=y" >> .config
+        fi
+        
+        # Also set the MULTI_PROFILE to false to build single device
+        sed -i 's/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/' .config || true
+        
+        echo "Rockchip device configured: $DEVICE"
+
+    - name: Apply patches
+      run: |
+        cd openwrt
+        cp -rn devices/common/patches devices/${{ env.TARGET }}/
+          if [ -n "$(ls -A devices/${{ env.TARGET }}/*.bin.patch 2>/dev/null)" ]; then
+            git apply devices/${{ env.TARGET }}/patches/*.bin.patch
+          fi
+          find "devices/${{ env.TARGET }}/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 --forward"
+          find "devices/${{ env.TARGET }}/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 --forward"
+        sed -i '$a  \
+        CONFIG_CPU_FREQ_GOV_POWERSAVE=y \
+        CONFIG_CPU_FREQ_GOV_USERSPACE=y \
+        CONFIG_CPU_FREQ_GOV_ONDEMAND=y \
+        CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y \
+        CONFIG_CRYPTO_CHACHA20_NEON=y \
+        CONFIG_CRYPTO_CHACHA20POLY1305=y \
+        CONFIG_FAT_DEFAULT_IOCHARSET="utf8" \
+        ' `find target/linux -path "target/linux/*/config-*"`
+
+    - name: Defconfig
+      run: |
+        cd openwrt
+        make defconfig
+        if [[ ! "${{ env.TARGET }}" =~ (amlogic_meson8b|armsr_armv8|bcm27xx_*|rockchip_armv8|sunxi_*|x86_*|siflower_*) ]]; then
+        sed -n '/# Wireless Drivers/,/# end of Wireless Drivers/p' .config | sed -e 's/=m/=n/' >>.config
+        sed -i "s/\(kmod-qca.*\)=m/\1=n/" .config
+        make defconfig
+        fi
+        cat .config
+
+    - name: Cache
+      uses: stupidloud/cachewrtbuild@main
+      with:
+        ccache: 'false'
+        mixkey: ${{ env.TARGET }}
+        clean: ${{ contains(github.event.action, 'nocache') || contains(github.event.inputs.param, 'nocache') }}
+        prefix: ${{ github.workspace }}/openwrt
+
+    - name: SSH connection to Actions
+      uses: kiddin9/debugger-action@master
+      if: contains(github.event.action, 'ssh') || contains(github.event.inputs.param, 'ssh')
+
+    - name: Compile the firmware
+      id: compile
+      run: |
+        shopt -s extglob
+        df -hT
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make -j$(($(nproc)+1)) || (df -hT;log=$(mktemp);make target/imagebuilder/install &>$log) || (tail -50 $log; curl -k --data chat_id="${{ env.TELEGRAM_CHAT_ID }}" --data "text=❌ OpenWrt ${{ env.VERSION }} ${{ env.TARGET }} 编译失败 😂" "https://api.telegram.org/bot${{ env.TELEGRAM_TOKEN }}/sendMessage";df -hT;exit 1)
+        rm -rf staging_dir/toolchain-*/bin/*openwrt-linux-musl-lto-dump
+        rm -rf staging_dir/toolchain-*/initial
+        df -hT
+
+    - name: Organize files
+      id: organize
+      continue-on-error: true
+      run: |
+        shopt -s extglob
+        cd openwrt/bin/targets/*/*/
+        cp $GITHUB_WORKSPACE/openwrt/.config ${{ env.TARGET }}.config || true
+        cp $GITHUB_WORKSPACE/openwrt/build_dir/target-*/linux-*/linux-*/.config ${{ env.TARGET }}_kernel.config || true
+        Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
+        echo "EMOJI=${Emoji[$[$RANDOM % ${#Emoji[@]}]]}" >> $GITHUB_ENV
+
+    - name: Upload firmware for artifact
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_FIRMWARE_FOR_ARTIFACT == 'true'
+      with:
+        name: ${{ env.VERSION }}_${{ env.TARGET }}
+        path: |
+          openwrt/bin/targets/
+
+    - name: Deploy imagebuilder to server
+      uses: easingthemes/ssh-deploy@main
+      if: env.SSH_PRIVATE_KEY && ! contains(github.event.action, 'noser') && ! contains(github.event.inputs.param, 'noser')
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        ARGS: "-avr --timeout=600"
+        SSH_CMD_ARGS: "-o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o StrictHostKeyChecking=no"
+        SOURCE: openwrt/bin/targets
+        EXCLUDE: "kwrt-*-squashfs-*"
+        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
+        REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+        TARGET: "/www/wwwroot/dl.openwrt.ai/releases/tmp/"
+
+    - name: Create release
+      id: create_release
+      if: env.REPO_TOKEN
+      continue-on-error: true
+      run: |
+        echo -e "墙内加速下载 🚀:\n" >> release.txt
+        echo -e "[腾讯云] (https://dl.openwrt.ai/firmware/${{ env.TARGET }}/ ☁)\n" >> release.txt
+        [ ${{ env.WETRANS }} ] && echo -e "[WeTransfer] (${{ env.WETRANS }} 🗽)\n" >> release.txt
+        [ ${{ env.COWURL }} ] && echo -e "[奶牛上传] (${{ env.COWURL }} 🐮)\n" >> release.txt
+        [ ${{ env.NOTICE }} ] && echo -e "${{ env.NOTICE }}" >> release.txt || true
+
+    - name: Upload firmware for release
+      uses: softprops/action-gh-release@master
+      continue-on-error: true
+      if: env.REPO_TOKEN
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: "${{ env.FIRMWARE }}/*"
+        name: ${{ env.date2 }} ${{ env.TARGET }} ${{ env.EMOJI }}
+        tag_name: ${{ env.date }}_${{ env.TARGET }}
+        body_path: release.txt
+    
+    - name: WeChat notification
+      continue-on-error: true
+      if: env.SCKEY
+      run: |
+        # [ steps.compile.outputs.status == 'success' ] && curl https://sctapi.ftqq.com/${{ secrets.SCKEY }}.send?text=🎉OpenWrt_${{ env.VERSION }}_${{ env.TARGET }}编译完成😋|| curl https://sctapi.ftqq.com/${{ secrets.SCKEY }}.send?text=❌OpenWrt_${{ env.VERSION }}_${{ env.TARGET }}编译失败😂
+
+    - name: Telegram notification
+      if: env.TELEGRAM_TOKEN && ! contains(github.event.action, 'notg') && ! contains(github.event.inputs.param, 'notg')
+      continue-on-error: true
+      run: |
+        curl -k --data chat_id="${{ env.TELEGRAM_CHAT_ID }}" --data "text=🎉 OpenWrt ${{ env.VERSION }} ${{ env.TARGET }} 编译成功 😋  https://dl.openwrt.ai/firmware/${{ env.TARGET }}/  ${{ env.COWURL }}   ${{ env.WETRANS }} 🚀" "https://api.telegram.org/bot${{ env.TELEGRAM_TOKEN }}/sendMessage"
+
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      continue-on-error: true
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        retain_days: 100
+        keep_minimum_runs: 0
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@master
+      continue-on-error: true
+      if: env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 15
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
