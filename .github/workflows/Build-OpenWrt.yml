@@ -118,17 +118,6 @@ on:
         required: false
         type: boolean
         default: true
-      upload_cowtransfer:
-        description: 'Upload firmware to CowTransfer'
-        required: false
-        type: boolean
-        default: false
-      upload_wetransfer:
-        description: 'Upload firmware to WeTransfer'
-        required: false
-        type: boolean
-        default: false
-
 env:
   REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   PPPOE_USERNAME: ${{ secrets.PPPOE_USERNAME }}
@@ -161,18 +150,6 @@ jobs:
         workflow_id: all
         access_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Check and Trigger Packages Update
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        gitdate=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -s "https://api.github.com/repos/${{ github.repository }}/actions/runs" | jq -r '.workflow_runs[0].created_at')
-        gitdate=$(date -d "$gitdate" +%s)
-        now=$(date -d "$(date)" +%s)
-        if [[ $(expr $gitdate + 120) < $now ]]; then
-        curl -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
-        -H "Accept: application/vnd.github.everest-preview+json" \
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-        --data '{"event_type": "update"}'
-        fi
 
     - name: Set action parameters
       run: |
@@ -249,8 +226,6 @@ jobs:
           echo "UPLOAD_BIN_DIR_FOR_ARTIFACT=${{ github.event.inputs.upload_bin_dir }}" >> $GITHUB_ENV
           echo "UPLOAD_FIRMWARE_FOR_ARTIFACT=${{ github.event.inputs.upload_firmware_artifact }}" >> $GITHUB_ENV
           echo "UPLOAD_FIRMWARE_FOR_RELEASE=${{ github.event.inputs.upload_firmware_release }}" >> $GITHUB_ENV
-          echo "UPLOAD_FIRMWARE_TO_COWTRANSFER=${{ github.event.inputs.upload_cowtransfer }}" >> $GITHUB_ENV
-          echo "UPLOAD_FIRMWARE_TO_WETRANSFER=${{ github.event.inputs.upload_wetransfer }}" >> $GITHUB_ENV
         else
           # Use settings.ini values for repository_dispatch
           echo "REPO_URL=${REPO_URL}" >> $GITHUB_ENV
@@ -267,17 +242,6 @@ jobs:
         sed -i "1a REPO_TOKEN=${{ secrets.GITHUB_TOKEN }}" ${{ github.workspace }}/devices/common/diy.sh
         sed -i "1a TARGET=\"$TARGET_DEVICE\"" ${{ github.workspace }}/devices/common/diy.sh
 
-    - name: Trigger Packages Update
-      continue-on-error: true
-      if: contains(env.ACTION, 'pkg')
-      run: |
-        status=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -s "https://api.github.com/repos/kiddin9/kwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
-        if [[ "$status" == "completed" ]]; then
-          curl -X POST https://api.github.com/repos/kiddin9/kwrt-packages/dispatches \
-            -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          --data '{"event_type": "update"}'
-        fi
 
     - name: Free disk space
       uses: coder-xiaomo/free-disk-space@main
@@ -462,9 +426,6 @@ jobs:
         clean: ${{ contains(env.ACTION, 'nocache') }}
         prefix: ${{ github.workspace }}/openwrt
 
-    - name: SSH connection to Actions
-      uses: kiddin9/debugger-action@master
-      if: contains(env.ACTION, 'ssh')
 
     - name: Compile the firmware
       id: compile
