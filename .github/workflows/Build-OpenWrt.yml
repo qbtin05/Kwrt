@@ -411,7 +411,7 @@ jobs:
         echo "Building specific Rockchip device: $DEVICE"
         
         # Disable all devices first
-        sed -i 's/CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_.*=y/CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_\1=n/g' .config
+        sed -i 's/\(CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_.*\)=y/\1=n/g' .config
         
         # Enable only the selected device
         if grep -q "CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_${DEVICE}=" .config; then
