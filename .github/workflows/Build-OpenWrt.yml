@@ -375,9 +375,9 @@ jobs:
           # Add configuration to build only the selected device
           echo "" >> .config
           echo "# Build only selected device" >> .config
-          # Disable building all profiles to avoid compiling every device under the platform
-          sed -i '/^CONFIG_TARGET_ALL_PROFILES=/d' .config
-          echo "CONFIG_TARGET_ALL_PROFILES=n" >> .config
+          # # Disable building all profiles to avoid compiling every device under the platform
+          # sed -i '/^CONFIG_TARGET_ALL_PROFILES=/d' .config
+          # echo "CONFIG_TARGET_ALL_PROFILES=n" >> .config
           echo "CONFIG_TARGET_MULTI_PROFILE=y" >> .config
           echo "CONFIG_TARGET_PER_DEVICE_ROOTFS=y" >> .config
           echo "CONFIG_TARGET_DEVICE_${BASE_PLATFORM}_DEVICE_${DEVICE_VAR}=y" >> .config
