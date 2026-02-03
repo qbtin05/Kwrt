@@ -6,7 +6,7 @@
          secs="$$(($$1 % 86400))"; \
 -        yday="$$(date --utc --date="@$$1" "+%y.%j")"; \
 +        yday="$$(date --utc --date="@$$(($$1 + 365*24*60*60))" "+%y.%j")"; \
-         printf '%s.%05d~%s' "$$yday" "$$secs" "$$2"; \
+         printf '%s.%05d_%s' "$$yday" "$$secs" "$$2"; \
        else \
          echo "0"; \
 @@ -207,9 +207,20 @@ define Package/$(PKG_NAME)/install
