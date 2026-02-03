@@ -243,16 +243,16 @@ jobs:
         sed -i "1a TARGET=\"$TARGET_DEVICE\"" ${{ github.workspace }}/devices/common/diy.sh
 
 
-    - name: Free disk space
-      uses: coder-xiaomo/free-disk-space@main
-      with:
-        tool-cache: false
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
+    # - name: Free disk space
+    #   uses: coder-xiaomo/free-disk-space@main
+    #   with:
+    #     tool-cache: false
+    #     android: true
+    #     dotnet: true
+    #     haskell: true
+    #     large-packages: true
+    #     docker-images: true
+    #     swap-storage: true
 
     - name: Initialization environment
       env:
@@ -307,13 +307,13 @@ jobs:
             fi
         fi
 
-    - name: Free up disk space
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo mkdir -p -m 777 /mnt/openwrt/build_dir openwrt/staging_dir
-        ln -sf /mnt/openwrt/build_dir openwrt/build_dir
-        sudo ln -sf openwrt/staging_dir /mnt/openwrt/staging_dir
+    # - name: Free up disk space
+    #   env:
+    #     DEBIAN_FRONTEND: noninteractive
+    #   run: |
+    #     sudo mkdir -p -m 777 /mnt/openwrt/build_dir openwrt/staging_dir
+    #     ln -sf /mnt/openwrt/build_dir openwrt/build_dir
+    #     sudo ln -sf openwrt/staging_dir /mnt/openwrt/staging_dir
 
     - name: Load custom configuration
       run: |
