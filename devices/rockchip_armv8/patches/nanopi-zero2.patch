@@ -10,7 +10,7 @@
 +  SOC := rk3328
 +  UBOOT_DEVICE_NAME := nanopi-r2s-rk3328
 +  IMAGE/sysupgrade.img.gz := boot-common | boot-script | pine64-bin | gzip | append-metadata
-+  DEVICE_PACKAGES := -luci-app-gpsysupgrade kmod-gpio-button-hotplug kmod-usb-net-rtl8152
++  DEVICE_PACKAGES := kmod-gpio-button-hotplug kmod-usb-net-rtl8152
 +  DEVICE_DTS = rockchip/rk3328-nanopi-r2s
 +endef
 +TARGET_DEVICES += friendlyarm_nanopi-zero2
