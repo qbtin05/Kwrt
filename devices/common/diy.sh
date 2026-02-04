@@ -71,9 +71,9 @@ sed -i 's/max_requests 3/max_requests 20/g' package/network/services/uhttpd/file
 #rm -rf ./feeds/packages/lang/{golang,node}
 sed -i "s/tty\(0\|1\)::askfirst/tty\1::respawn/g" target/linux/*/base-files/etc/inittab
 
-# Use underscore format for APK, dot format for OPKG
+# Use hyphen format for APK (underscore not supported), dot format for OPKG
 if grep -q "CONFIG_USE_APK=y" .config 2>/dev/null; then
-	date=`date +%m_%d_%Y`
+	date=`date +%m-%d-%Y`
 else
 	date=`date +%m.%d.%Y`
 fi
