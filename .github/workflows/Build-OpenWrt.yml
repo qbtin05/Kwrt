@@ -258,7 +258,13 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Asia/Taipei
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
+        LANGUAGE: en_US.UTF-8
       run: |
+        # Ensure UTF-8 locale is generated and set as default
+        sudo locale-gen en_US.UTF-8
+        sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential clang flex bison g++ gawk \
         gcc-multilib g++-multilib gettext git libncurses5-dev libssl-dev \
@@ -270,6 +276,11 @@ jobs:
         # sudo timedatectl set-timezone "Asia/Taipei"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
+        # Configure Git to handle Unicode and encoding properly
+        git config --global core.quotePath false
+        git config --global core.precomposeunicode true
+        git config --global i18n.commitEncoding utf-8
+        git config --global i18n.logOutputEncoding utf-8
 
     - name: Get current date
       id: date
@@ -317,6 +328,9 @@ jobs:
     #     sudo ln -sf openwrt/staging_dir /mnt/openwrt/staging_dir
 
     - name: Load custom configuration
+      env:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
       run: |
         function git_clone_path() {
           trap 'rm -rf "$tmpdir"' EXIT
@@ -324,6 +338,14 @@ jobs:
           [[ "$mv" != "mv" ]] && shift 2 || shift 3
           rootdir="$PWD"
           tmpdir="$(mktemp -d)" || exit 1
+          # Configure git to handle Unicode properly for this operation
+          export GIT_CONFIG_COUNT=3
+          export GIT_CONFIG_KEY_0="core.quotePath"
+          export GIT_CONFIG_VALUE_0="false"
+          export GIT_CONFIG_KEY_1="core.precomposeunicode"
+          export GIT_CONFIG_VALUE_1="true"
+          export GIT_CONFIG_KEY_2="i18n.logOutputEncoding"
+          export GIT_CONFIG_VALUE_2="utf-8"
           if [ ${#branch} -lt 10 ]; then
           git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$tmpdir"
           cd "$tmpdir"
@@ -391,6 +413,9 @@ jobs:
         cp -Rf ./diy/* ./ || true
 
     - name: Apply patches
+      env:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
       run: |
         cd openwrt
         BASE_PLATFORM="${{ env.BASE_PLATFORM }}"
@@ -411,6 +436,9 @@ jobs:
         ' `find target/linux -path "target/linux/*/config-*"`
 
     - name: Defconfig
+      env:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
       run: |
         cd openwrt
         BASE_PLATFORM="${{ env.BASE_PLATFORM }}"
@@ -435,6 +463,8 @@ jobs:
       id: compile
       env:
         FORCE_UNSAFE_CONFIGURE: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
       run: |
         shopt -s extglob
         df -hT
