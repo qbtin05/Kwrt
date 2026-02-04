@@ -15,6 +15,15 @@ sed -i "s?git.openwrt.org/\(project\|feed\)?github.com/openwrt?g" feeds.conf.def
 ./scripts/feeds install -a -p kiddin9 -f
 ./scripts/feeds install -a
 
+# Fix recursive Kconfig dependencies in gnunet packages
+# Remove packages that have circular dependencies
+rm -rf feeds/packages/net/gnunet-gns-pgsql feeds/packages/net/gnunet-gns-sqlite 2>/dev/null || true
+# Fix Kconfig files if gnunet package exists
+if [ -f "feeds/packages/net/gnunet/Makefile" ]; then
+	# Remove self-referential dependencies from Kconfig if present
+	find feeds/packages/net/gnunet -name "Kconfig*" -type f -exec sed -i '/depends on PACKAGE_gnunet-gns-pgsql/d; /depends on PACKAGE_gnunet-gns-sqlite/d' {} \; 2>/dev/null || true
+fi
+
 sed --follow-symlinks -i "s#%C\"#%C by Kiddin'\"#" package/base-files/files/etc/os-release
 sed -i -e '$a /etc/bench.log' \
         -e '/\/etc\/profile/d' \
@@ -71,9 +80,10 @@ sed -i 's/max_requests 3/max_requests 20/g' package/network/services/uhttpd/file
 #rm -rf ./feeds/packages/lang/{golang,node}
 sed -i "s/tty\(0\|1\)::askfirst/tty\1::respawn/g" target/linux/*/base-files/etc/inittab
 
-# Use dot format for both APK and OPKG for version consistency
-version_date=`date +%m.%d.%Y`
-sed -i -e "/\(# \)\?REVISION:=/c\REVISION:=$version_date" -e '/VERSION_CODE:=/c\VERSION_CODE:=$(REVISION)' include/version.mk
+# Use dash format for version to ensure compatibility with package managers
+# Format: 1688-YYYYMMDD (e.g., 1688-20260204)
+version_date=`date +%Y%m%d`
+sed -i -e "/\(# \)\?REVISION:=/c\REVISION:=1688-$version_date" -e "/VERSION_CODE:=/c\VERSION_CODE:=1688-$version_date" include/version.mk
 
 sed -i 's/option timeout 30/option timeout 60/g' package/system/rpcd/files/rpcd.config
 sed -i 's#20) \* 1000#60) \* 1000#g' feeds/luci/modules/luci-base/htdocs/luci-static/resources/rpc.js
