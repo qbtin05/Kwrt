@@ -260,7 +260,6 @@ jobs:
         TZ: Asia/Taipei
         LC_ALL: en_US.UTF-8
         LANG: en_US.UTF-8
-        LANGUAGE: en_US.UTF-8
       run: |
         # Ensure UTF-8 locale is generated and set as default
         sudo locale-gen en_US.UTF-8
@@ -338,14 +337,17 @@ jobs:
           [[ "$mv" != "mv" ]] && shift 2 || shift 3
           rootdir="$PWD"
           tmpdir="$(mktemp -d)" || exit 1
-          # Configure git to handle Unicode properly for this operation
-          export GIT_CONFIG_COUNT=3
+          # Ensure git handles Unicode properly (defense in depth for this operation)
+          # These settings reinforce the global configuration for this subprocess
+          export GIT_CONFIG_COUNT=4
           export GIT_CONFIG_KEY_0="core.quotePath"
           export GIT_CONFIG_VALUE_0="false"
           export GIT_CONFIG_KEY_1="core.precomposeunicode"
           export GIT_CONFIG_VALUE_1="true"
-          export GIT_CONFIG_KEY_2="i18n.logOutputEncoding"
+          export GIT_CONFIG_KEY_2="i18n.commitEncoding"
           export GIT_CONFIG_VALUE_2="utf-8"
+          export GIT_CONFIG_KEY_3="i18n.logOutputEncoding"
+          export GIT_CONFIG_VALUE_3="utf-8"
           if [ ${#branch} -lt 10 ]; then
           git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$tmpdir"
           cd "$tmpdir"
