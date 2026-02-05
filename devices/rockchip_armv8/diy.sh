@@ -43,6 +43,7 @@ sed -i -e 's/kmod-hwmon-pwmfan//g' target/linux/rockchip/image/armv8.mk
 sed -i -e 's/kmod-hwmon-drivetemp//g' target/linux/rockchip/image/armv8.mk
 sed -i -e 's/kmod-dsa-rtl8365mb//g' target/linux/rockchip/image/armv8.mk
 sed -i -e 's/kmod-fb-tft-st7789v//g' target/linux/rockchip/image/armv8.mk
+sed -i -e 's/wpad-openssl/wpad-mbedtls/g' target/linux/rockchip/image/armv8.mk
 
 # Remove various missing wireless firmware packages
 sed -i -e 's/brcmfmac-firmware-43752-sdio//g' target/linux/rockchip/image/armv8.mk
