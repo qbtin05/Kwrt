@@ -9,13 +9,19 @@
    include $(INCLUDE_DIR)/subdir.mk
    include target/Makefile
 @@ -131,6 +132,10 @@ world: prepare $(target/stamp-compile) $(package/stamp-compile) $(package/stamp-
- 	$(_SINGLE)$(SUBMAKE) -r package/index
- 	$(_SINGLE)$(SUBMAKE) -r json_overview_image_info
- 	$(_SINGLE)$(SUBMAKE) -r checksum
-+	cp -f $(BIN_DIR)/packages/Packages.manifest $(BIN_DIR)/
-+	rm -rf $(BIN_DIR)/$(LINUX_VERSION)
-+	mv -f $(BIN_DIR)/packages $(BIN_DIR)/$(LINUX_VERSION) 2>/dev/null
-+	mv -f $(BIN_DIR)/profiles.json $(BIN_DIR)/profiles.json.b 2>/dev/null
+   $(_SINGLE)$(SUBMAKE) -r package/index
+   $(_SINGLE)$(SUBMAKE) -r json_overview_image_info
+   $(_SINGLE)$(SUBMAKE) -r checksum
+   @if [ -f $(BIN_DIR)/packages/Packages.manifest ]; then \
+      cp -f $(BIN_DIR)/packages/Packages.manifest $(BIN_DIR)/; \
+   fi
+   rm -rf $(BIN_DIR)/$(LINUX_VERSION)
+   @if [ -d $(BIN_DIR)/packages ]; then \
+      mv -f $(BIN_DIR)/packages $(BIN_DIR)/$(LINUX_VERSION); \
+   fi
+   @if [ -f $(BIN_DIR)/profiles.json ]; then \
+      mv -f $(BIN_DIR)/profiles.json $(BIN_DIR)/profiles.json.b; \
+   fi
  ifneq ($(CONFIG_CCACHE),)
  	$(STAGING_DIR_HOST)/bin/ccache -s
  endif
